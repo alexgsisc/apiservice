@@ -16,7 +16,7 @@ interface InfoApiService {
 
     //Peticion por usuario
     @GET("character/{idUser}")
-    fun getPersoId(@Path("idUser") idUser: Int): Observable<Result>
+    fun getPersonId(@Path("idUser") idUser: Int): Observable<Result>
 
     class Builder() : BaseServiceBuilders<InfoApiService>() {
         override fun build(): InfoApiService {
