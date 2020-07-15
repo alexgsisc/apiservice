@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 abstract class BaseServiceBuilders<T : Any> {
     var retrofitBuild: Retrofit.Builder
-    lateinit var interceptors: Interceptor
+    var interceptors: Interceptor
 
     protected constructor(interceptor: Interceptor? = GenericInterceptor()) {
         this.interceptors = interceptor!!
@@ -19,14 +19,11 @@ abstract class BaseServiceBuilders<T : Any> {
     init {
         //https://rickandmortyapi.com/api/character/?page=1
         val okHttpClientBuilder = OkHttpClient().newBuilder()
-        //okHttpClientBuilder.interceptors().clear()
-        //okHttpClientBuilder.protocols(listOf(Protocol.HTTP_1_1))
         okHttpClientBuilder
-            .readTimeout(2, TimeUnit.MINUTES)
-            .writeTimeout(2, TimeUnit.MINUTES)
-            .connectTimeout(2, TimeUnit.MINUTES)
+            .readTimeout(3, TimeUnit.MINUTES)
+            .writeTimeout(3, TimeUnit.MINUTES)
+            .connectTimeout(3, TimeUnit.MINUTES)
             .retryOnConnectionFailure(false)
-            //.addInterceptor(interceptors)
         val client = okHttpClientBuilder.build()
         retrofitBuild = Retrofit.Builder()
             .baseUrl("https://rickandmortyapi.com/api/")
