@@ -1,20 +1,23 @@
 package com.example.apiservice.user.view.fragment
 
+import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.apiservice.R
+import com.example.apiservice.common.dialog.ProgressDialogFragment
 import com.example.apiservice.common.entity.TypeDataView
 import com.example.apiservice.user.model.Result
 import com.example.apiservice.user.presenter.UserPresenter
-import com.example.apiservice.user.view.adapter.UserAdapterRecycler
 import com.example.apiservice.user.view.UserView
+import com.example.apiservice.user.view.adapter.UserAdapterRecycler
 import kotlinx.android.synthetic.main.list_user_fragment.*
+
 
 class UserFragment : Fragment(), UserView,
     UserAdapterRecycler.UserAdapterRecyclerView {
@@ -23,6 +26,7 @@ class UserFragment : Fragment(), UserView,
     private var recyclerviewAdapter: UserAdapterRecycler? = null
     var mCallback: ViewClickElement? = null
     val TAG = UserFragment::class.java.simpleName
+    val progressTemp = ProgressDialogFragment()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -35,6 +39,12 @@ class UserFragment : Fragment(), UserView,
         super.onViewCreated(view, savedInstanceState)
         userPresenter = UserPresenter(this, this.context!!)
         rcv_data.layoutManager = LinearLayoutManager(this!!.context)
+        setHasOptionsMenu(true)
+        (activity!! as AppCompatActivity).setSupportActionBar(tool_bar_person)
+        //(activity!! as AppCompatActivity).supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        (activity!! as AppCompatActivity).supportActionBar!!.title = "Pesonajes";
+
+        loadView()
 
     }
 
@@ -59,6 +69,7 @@ class UserFragment : Fragment(), UserView,
             )
         rcv_data.adapter = recyclerviewAdapter
         recyclerviewAdapter!!.notifyDataSetChanged()
+        progress_circular.visibility = View.GONE
     }
 
     override fun viewsClickUser(result: Result) {
@@ -66,9 +77,11 @@ class UserFragment : Fragment(), UserView,
     }
 
     override fun loadView() {
+        progressTemp.show(this.activity!!.supportFragmentManager, TAG)
     }
 
     override fun formView() {
+        progressTemp.dismiss()
     }
 
     override fun onAttach(context: Context) {
@@ -83,6 +96,33 @@ class UserFragment : Fragment(), UserView,
 
     interface ViewClickElement {
         fun viewDetailUser(data: Result)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        //super.onCreateOptionsMenu(menu, inflater)
+        activity!!.menuInflater.inflate(R.menu.menu_search, menu)
+
+        val searchManager: SearchManager =
+            activity!!.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        var searchView: SearchView = menu.findItem(R.id.search_person).actionView as SearchView
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(activity!!.componentName))
+        searchView.maxWidth = Integer.MAX_VALUE
+
+        searchView.setOnQueryTextListener(object :
+            SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                Log.e(TAG, "1.- $query")
+                recyclerviewAdapter!!.filter.filter(query)
+                return false
+            }
+
+            override fun onQueryTextChange(query: String): Boolean {
+                Log.e(TAG, "2.- $query")
+                recyclerviewAdapter!!.filter.filter(query)
+                return false
+            }
+        })
+
     }
 
 
