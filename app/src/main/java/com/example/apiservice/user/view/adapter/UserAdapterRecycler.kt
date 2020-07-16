@@ -4,9 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -16,12 +14,17 @@ import com.example.apiservice.common.entity.TypeDataView
 import com.example.apiservice.user.model.Result
 
 class UserAdapterRecycler(
-    private val listData: List<TypeDataView>,
+    private val listDataOrigin: List<TypeDataView>,
     private val context: Context,
     views: UserAdapterRecyclerView
 ) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerView.ViewHolder>(), Filterable {
     private var viewsUserAdapter: UserAdapterRecyclerView = views
+    private var listData = mutableListOf<TypeDataView>()
+
+    init {
+        listData = listDataOrigin as MutableList<TypeDataView>
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
@@ -87,5 +90,38 @@ class UserAdapterRecycler(
 
     interface UserAdapterRecyclerView {
         fun viewsClickUser(result: Result)
+    }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val charSearch = constraint.toString()
+                if (charSearch.isEmpty()) {
+                    listData = listDataOrigin as MutableList<TypeDataView>
+                } else {
+                    val resultList = mutableListOf<TypeDataView>()
+                    for (row in listDataOrigin) {
+                        when (row.getDataType) {
+                            TypeData.PERSON_RESULT.value -> {
+                                val resultTemp = row as Result
+                                if (resultTemp.name.decapitalize().trim().contains(charSearch.decapitalize())) {
+                                    resultList.add(resultTemp)
+                                }
+                            }
+
+                        }
+                    }
+                    listData = resultList
+                }
+                val filterResults = FilterResults()
+                filterResults.values = listData
+                return filterResults
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                listData = results?.values as MutableList<TypeDataView>
+                notifyDataSetChanged()
+            }
+        }
     }
 }
