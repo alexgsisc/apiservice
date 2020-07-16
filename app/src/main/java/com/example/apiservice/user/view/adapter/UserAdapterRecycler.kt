@@ -104,7 +104,7 @@ class UserAdapterRecycler(
                         when (row.getDataType) {
                             TypeData.PERSON_RESULT.value -> {
                                 val resultTemp = row as Result
-                                if (resultTemp.name.decapitalize().trim().contains(charSearch.decapitalize())) {
+                                if (resultTemp.name.decapitalize().contains(charSearch.decapitalize(), true)) {
                                     resultList.add(resultTemp)
                                 }
                             }
