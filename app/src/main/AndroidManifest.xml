@@ -6,19 +6,25 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/test_image"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/test_image"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <provider
+            android:name=".common.search.SuggestionSearchPerson"
+            android:authorities="com.example.apiservice.common.search.SuggestionSearchPerson"
+            android:readPermission="com.example.provider.READ_MY_DATA"
+            android:writePermission="com.example.provider.WRITE_MY_DATA"/>
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.app.search_temp"
-                android:resource="@xml/search_temp"/>
+                android:resource="@xml/search_temp" />
+
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH"/>
+                <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
 
             <intent-filter>
