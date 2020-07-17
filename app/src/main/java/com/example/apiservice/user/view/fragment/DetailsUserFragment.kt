@@ -27,11 +27,11 @@ class DetailsUserFragment : Fragment() {
             dataTemp = Gson().fromJson(arguments!!.getString("DATA_INFO"), Result::class.java)
         }
 
-        Glide.with(this.context!!)
+        /*Glide.with(this.context!!)
             .load(dataTemp!!.image)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .placeholder(android.R.drawable.progress_horizontal)
-            .into(img_avatar)
+            .into(img_avatar)*/
 
         title_person.text = dataTemp!!.name
 

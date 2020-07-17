@@ -136,7 +136,6 @@ class UserFragment : Fragment(), UserView,
             }
 
             override fun onQueryTextChange(query: String): Boolean {
-                Log.e(TAG, "2.- $query")
                 val cursor = getRecentSuggestions(query)
                 mSuggestionAdapter.swapCursor(cursor)
 

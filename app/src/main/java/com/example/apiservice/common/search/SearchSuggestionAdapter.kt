@@ -11,11 +11,22 @@ import android.widget.TextView
 import androidx.cursoradapter.widget.CursorAdapter
 import com.example.apiservice.R
 
+/**
+ * Adapter para mostrar sugerencias de busquedas recientes.
+ *
+ * @param context The context where the class
+ * @param cursor The database cursor.  Can be null if the cursor is not available yet.
+ * @param flags he views that should display column in the "from" parameter.
+ *            These should all be TextViews. The first N views in this list
+ *            are given the values of the first N columns in the from
+ *            parameter.  Can be null if the cursor is not available yet.
+ *
+ */
 class SearchSuggestionAdapter(
     context: Context?,
-    c: Cursor?,
+    cursor: Cursor?,
     flags: Int
-) : CursorAdapter(context, c, flags) {
+) : CursorAdapter(context, cursor, flags) {
     override fun newView(
         context: Context,
         cursor: Cursor,
