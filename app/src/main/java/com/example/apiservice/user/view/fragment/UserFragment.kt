@@ -1,7 +1,10 @@
 package com.example.apiservice.user.view.fragment
 
 import android.app.SearchManager
+import android.content.ContentResolver
 import android.content.Context
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
 import android.provider.SearchRecentSuggestions
 import android.util.Log
@@ -13,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.apiservice.R
 import com.example.apiservice.common.dialog.ProgressDialogFragment
 import com.example.apiservice.common.entity.TypeDataView
+import com.example.apiservice.common.search.SearchSuggestionAdapter
 import com.example.apiservice.common.search.SuggestionSearchPerson
 import com.example.apiservice.user.model.Result
 import com.example.apiservice.user.presenter.UserPresenter
@@ -105,17 +109,17 @@ class UserFragment : Fragment(), UserView,
         //super.onCreateOptionsMenu(menu, inflater)
         activity!!.menuInflater.inflate(R.menu.menu_search, menu)
 
-
+        var mSuggestionAdapter = SearchSuggestionAdapter(this.context!!, null, 0)
         val searchManager: SearchManager =
             activity!!.getSystemService(Context.SEARCH_SERVICE) as SearchManager
         var searchView: SearchView = menu.findItem(R.id.search_person).actionView as SearchView
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity!!.componentName))
         searchView.isQueryRefinementEnabled = true
+        searchView.suggestionsAdapter = mSuggestionAdapter
         searchView.maxWidth = Integer.MAX_VALUE
 
         searchView.setOnQueryTextListener(object :
             SearchView.OnQueryTextListener {
-
 
             override fun onQueryTextSubmit(query: String): Boolean {
                 Log.e(TAG, "1.- $query")
@@ -133,10 +137,25 @@ class UserFragment : Fragment(), UserView,
 
             override fun onQueryTextChange(query: String): Boolean {
                 Log.e(TAG, "2.- $query")
+                val cursor = getRecentSuggestions(query)
+                mSuggestionAdapter.swapCursor(cursor)
 
                 recyclerviewAdapter!!.filter.filter(query)
                 return false
             }
+        })
+
+        //Click in sugerencia
+        searchView.setOnSuggestionListener( object : SearchView.OnSuggestionListener{
+            override fun onSuggestionSelect(position: Int): Boolean {
+                return false
+            }
+
+            override fun onSuggestionClick(position: Int): Boolean {
+                searchView.setQuery(mSuggestionAdapter.getSuggestionText(position), true);
+                return true
+            }
+
         })
 
     }
@@ -147,6 +166,17 @@ class UserFragment : Fragment(), UserView,
             return true
         }
         return onOptionsItemSelected(item)
+    }
+
+    fun getRecentSuggestions(query: String): Cursor? {
+        val uriBuilder: Uri.Builder = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_CONTENT)
+            .authority(SuggestionSearchPerson.AUTHORITY)
+        uriBuilder.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY)
+        val selection = " ?"
+        val selArgs = arrayOf(query)
+        val uri: Uri = uriBuilder.build()
+        return activity!!.contentResolver.query(uri, null, selection, selArgs, null)
     }
 
 
