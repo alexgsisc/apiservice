@@ -44,6 +44,7 @@ class UserAdapterRecycler(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (position == itemCount - 1) viewsUserAdapter.onRequestedLastItem()
         when (holder.itemViewType) {
             TypeData.PERSON_RESULT.value -> {
                 val personage = listData[position] as Result
@@ -60,7 +61,7 @@ class UserAdapterRecycler(
                 viewTemp.tvStatus.text = personage.status
 
                 holder.itemView.setOnClickListener {
-                    Toast.makeText(context, personage.name, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(context, personage.name, Toast.LENGTH_SHORT).show()
                     viewsUserAdapter.viewsClickUser(personage)
                 }
 
@@ -90,6 +91,7 @@ class UserAdapterRecycler(
 
     interface UserAdapterRecyclerView {
         fun viewsClickUser(result: Result)
+        fun onRequestedLastItem()
     }
 
     override fun getFilter(): Filter {
@@ -104,7 +106,9 @@ class UserAdapterRecycler(
                         when (row.getDataType) {
                             TypeData.PERSON_RESULT.value -> {
                                 val resultTemp = row as Result
-                                if (resultTemp.name.decapitalize().contains(charSearch.decapitalize(), true)) {
+                                if (resultTemp.name.decapitalize()
+                                        .contains(charSearch.decapitalize(), true)
+                                ) {
                                     resultList.add(resultTemp)
                                 }
                             }
