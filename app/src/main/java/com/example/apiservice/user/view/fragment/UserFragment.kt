@@ -3,6 +3,7 @@ package com.example.apiservice.user.view.fragment
 import android.app.SearchManager
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -32,6 +33,9 @@ class UserFragment : Fragment(), UserView,
     private var recyclerviewAdapter: UserAdapterRecycler? = null
     private var mCallback: ViewClickElement? = null
     private val progressTemp = ProgressDialogFragment()
+    var nextPage = 0
+    private var listAddPerson: MutableList<TypeDataView> = mutableListOf()
+    var searActive = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -49,15 +53,14 @@ class UserFragment : Fragment(), UserView,
         (activity!! as AppCompatActivity).supportActionBar!!.title = "Pesonajes"
 
         //Guardar Datos de consultas
-
-
         loadView()
+
 
     }
 
     override fun onResume() {
         super.onResume()
-        userPresenter.getPersonSerie()
+        userPresenter.getPersonSerie(nextPage)
 
     }
 
@@ -67,10 +70,12 @@ class UserFragment : Fragment(), UserView,
             UserFragment()
     }
 
-    override fun setPaintData(data: List<TypeDataView>) {
+    override fun setPaintData(data: List<TypeDataView>, nextPage: Int) {
+        listAddPerson.addAll(data)
+        this.nextPage = nextPage
         recyclerviewAdapter =
             UserAdapterRecycler(
-                data,
+                listAddPerson,
                 this!!.context!!,
                 this
             )
@@ -81,6 +86,13 @@ class UserFragment : Fragment(), UserView,
 
     override fun viewsClickUser(result: Result) {
         mCallback!!.viewDetailUser(result)
+    }
+
+    override fun onRequestedLastItem() {
+        if (!this.searActive) {
+            progress_circular.visibility = View.VISIBLE
+            userPresenter.getPersonSerie(this.nextPage)
+        }
     }
 
     override fun loadView() {
@@ -106,7 +118,6 @@ class UserFragment : Fragment(), UserView,
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        //super.onCreateOptionsMenu(menu, inflater)
         activity!!.menuInflater.inflate(R.menu.menu_search, menu)
 
         var mSuggestionAdapter = SearchSuggestionAdapter(this.context!!, null, 0)
@@ -117,11 +128,17 @@ class UserFragment : Fragment(), UserView,
         searchView.isQueryRefinementEnabled = true
         searchView.suggestionsAdapter = mSuggestionAdapter
         searchView.maxWidth = Integer.MAX_VALUE
+        searchView.setOnCloseListener {
+            Log.e(":::CLOSE:::", "::__-__-__TRUE::")
+            this.searActive = false
+            false
+        }
 
         searchView.setOnQueryTextListener(object :
             SearchView.OnQueryTextListener {
 
             override fun onQueryTextSubmit(query: String): Boolean {
+                this@UserFragment.searActive = true
                 Log.e(TAG, "1.- $query")
                 SearchRecentSuggestions(
                     context,
@@ -136,6 +153,8 @@ class UserFragment : Fragment(), UserView,
             }
 
             override fun onQueryTextChange(query: String): Boolean {
+                Log.e(TAG, "2.- $query")
+                this@UserFragment.searActive = true
                 val cursor = getRecentSuggestions(query)
                 mSuggestionAdapter.swapCursor(cursor)
 
@@ -145,7 +164,7 @@ class UserFragment : Fragment(), UserView,
         })
 
         //Click in sugerencia
-        searchView.setOnSuggestionListener( object : SearchView.OnSuggestionListener{
+        searchView.setOnSuggestionListener(object : SearchView.OnSuggestionListener {
             override fun onSuggestionSelect(position: Int): Boolean {
                 return false
             }
